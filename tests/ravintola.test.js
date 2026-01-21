@@ -1,19 +1,62 @@
-import { assert, describe, expect, it } from 'vitest';
-import ravintola from '../ravintola/ravintola.js';
+import { describe, it, expect } from 'vitest';
+import ravintola from '../ravintola/ravintola';
 
-describe('Ravintolasovelluksen testaus', function () {
-  it('should return correct sun from laskeLasku when customer picks main course, starter, dessert and no drink', function () {
-    expect(ravintola.laskeLasku('juttu', true, true, false)).toBe(14);
+describe('Ravintola-yksikkötestit (Vitest)', () => {
+  /* -------------------------
+     1. laskeLasku
+  -------------------------- */
+  describe('laskeLasku', () => {
+    it('palauttaa oikean summan kun kaikki valittu', () => {
+      // pääruoka 6 + alkuruoka 4 + jälkiruoka 4 + juoma 3 = 17
+      const summa = ravintola.laskeLasku(true, true, true);
+      expect(summa).toBe(17);
+    });
+
+    it('palauttaa oikean summan kun vain pääruoka', () => {
+      const summa = ravintola.laskeLasku(false, false, false);
+      expect(summa).toBe(6);
+    });
+
+    it('palauttaa oikean summan kun alkuruoka ja juoma', () => {
+      // 6 + 4 + 3 = 13
+      const summa = ravintola.laskeLasku(true, false, true);
+      expect(summa).toBe(13);
+    });
   });
-  it('should return a value from one of the arrays in Ravintola (alkuruoat, paaruoat, jalkiruoat tai juomat.)', () => {
-    const testiArvoTaulukosta = ravintola.palautaTaulukonSatunnainenArvo(
-      ravintola.juomat
-    );
-    const taulukkoTestattavaksi = ravintola.juomat;
-    assert.include(
-      taulukkoTestattavaksi,
-      testiArvoTaulukosta,
-      'Taulukko ei sisällä arvoa'
-    );
+
+  /* -------------------------
+     2. palautaTaulukonSatunnainenArvo
+  -------------------------- */
+  describe('palautaTaulukonSatunnainenArvo', () => {
+    it('palauttaa arvon, joka löytyy alkuruokien taulukosta', () => {
+      const taulukko = ravintola.alkuruoat;
+      const arvo = ravintola.palautaTaulukonSatunnainenArvo(taulukko);
+
+      expect(taulukko).toContain(arvo);
+    });
+
+    it('palauttaa arvon, joka löytyy juomien taulukosta', () => {
+      const taulukko = ravintola.juomat;
+      const arvo = ravintola.palautaTaulukonSatunnainenArvo(taulukko);
+
+      expect(taulukko.includes(arvo)).toBe(true);
+    });
+  });
+
+  /* -------------------------
+     3. syoRavintolassa
+  -------------------------- */
+  describe('syoRavintolassa', () => {
+    it('palauttaa taulukon kun asiakkaita on sallittu määrä', () => {
+      const tulos = ravintola.syoRavintolassa(3);
+
+      expect(Array.isArray(tulos)).toBe(true);
+    });
+
+    it('palauttaa undefined kun asiakkaita liikaa', () => {
+      const tulos = ravintola.syoRavintolassa(100);
+
+      expect(tulos).toBeUndefined();
+    });
   });
 });
