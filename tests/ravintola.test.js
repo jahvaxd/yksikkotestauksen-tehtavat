@@ -1,62 +1,43 @@
-import { describe, it, expect } from 'vitest';
-import ravintola from '../ravintola/ravintola';
+import { describe, it, expect, beforeEach } from 'vitest';
+import ravintola from '../ravintola/ravintola'; // Polku siihen tiedostoon, missä Ravintola on
 
-describe('Ravintola-yksikkötestit (Vitest)', () => {
-  /* -------------------------
-     1. laskeLasku
-  -------------------------- */
-  describe('laskeLasku', () => {
-    it('palauttaa oikean summan kun kaikki valittu', () => {
-      // pääruoka 6 + alkuruoka 4 + jälkiruoka 4 + juoma 3 = 17
-      const summa = ravintola.laskeLasku(true, true, true);
-      expect(summa).toBe(17);
-    });
-
-    it('palauttaa oikean summan kun vain pääruoka', () => {
-      const summa = ravintola.laskeLasku(false, false, false);
-      expect(summa).toBe(6);
-    });
-
-    it('palauttaa oikean summan kun alkuruoka ja juoma', () => {
-      // 6 + 4 + 3 = 13
-      const summa = ravintola.laskeLasku(true, false, true);
-      expect(summa).toBe(13);
-    });
+describe('Ravintola testit', () => {
+  beforeEach(() => {
+    // Nollaa paikat ennen jokaista testiä, jotta testit eivät vaikuta toisiinsa
+    ravintola.generoiPaikat();
   });
 
-  /* -------------------------
-     2. palautaTaulukonSatunnainenArvo
-  -------------------------- */
-  describe('palautaTaulukonSatunnainenArvo', () => {
-    it('palauttaa arvon, joka löytyy alkuruokien taulukosta', () => {
-      const taulukko = ravintola.alkuruoat;
-      const arvo = ravintola.palautaTaulukonSatunnainenArvo(taulukko);
-
-      expect(taulukko).toContain(arvo);
-    });
-
-    it('palauttaa arvon, joka löytyy juomien taulukosta', () => {
-      const taulukko = ravintola.juomat;
-      const arvo = ravintola.palautaTaulukonSatunnainenArvo(taulukko);
-
-      expect(taulukko.includes(arvo)).toBe(true);
-    });
+  it('Testitapaus 1: syoRavintolassa menee läpi, jos asiakkaita <= paikkojen määrä', () => {
+    const asiakkaidenMaara = 10;
+    const tilaukset = ravintola.syoRavintolassa(asiakkaidenMaara);
+    expect(tilaukset.length).toBe(asiakkaidenMaara);
   });
 
-  /* -------------------------
-     3. syoRavintolassa
-  -------------------------- */
-  describe('syoRavintolassa', () => {
-    it('palauttaa taulukon kun asiakkaita on sallittu määrä', () => {
-      const tulos = ravintola.syoRavintolassa(3);
+  it('Testitapaus 2: syoRavintolassa ei mene läpi, jos paikkoja ei ole tarpeeksi', () => {
+    // Ensimmäinen varaus
+    const ensimmäinenVarauksenMaara = 10;
+    const ensimmäisetTilaukset = ravintola.syoRavintolassa(
+      ensimmäinenVarauksenMaara,
+    );
+    expect(ensimmäisetTilaukset.length).toBe(ensimmäinenVarauksenMaara);
 
-      expect(Array.isArray(tulos)).toBe(true);
-    });
+    // Toinen varaus, pitäisi epäonnistua (paikkoja jäljellä 5, yritetään varata 6)
+    const toinenVarauksenMaara = 6;
+    expect(() => {
+      ravintola.syoRavintolassa(toinenVarauksenMaara);
+    }).toThrowError('Ei tarpeeksi vapaita paikkoja');
+  });
 
-    it('palauttaa undefined kun asiakkaita liikaa', () => {
-      const tulos = ravintola.syoRavintolassa(100);
+  it('Testitapaus 3: laskeLasku toimii oikein uudella ohjelmakoodilla', () => {
+    // Tehdään testitilauksia manuaalisesti
+    const testTilaukset = [
+      { ruoka: 'Tomaattikeitto', hinta: 4 },
+      { ruoka: 'Kalakeitto', hinta: 6 },
+      { ruoka: 'Jäätelö', hinta: 3 },
+      { ruoka: 'Tee', hinta: 3 },
+    ];
 
-      expect(tulos).toBeUndefined();
-    });
+    const summa = ravintola.laskeLasku(testTilaukset);
+    expect(summa).toBe(16); // 4 + 6 + 3 + 3 = 16
   });
 });
