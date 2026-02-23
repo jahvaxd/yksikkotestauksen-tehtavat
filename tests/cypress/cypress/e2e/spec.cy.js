@@ -1,37 +1,37 @@
-describe('JAMK Wikipedia E2E -testi', () => {
-  it('Suomenkielinen haku ja vaihto englanniksi', () => {
-    // Käytetään desktop-näkymää
+describe('Pizza tilauslomake', () => {
+  beforeEach(() => {
     cy.viewport(1280, 800);
+    cy.visit('https://tiko.jamk.fi/~imjar/fronttiper/esimteht/pizza_anim/');
+  });
 
-    // 1. Mene suomenkieliselle Wikipedian pääsivulle
-    cy.visit('https://fi.wikipedia.org');
+  it('Täyttää tilauslomakkeen ja tarkistaa hinta', () => {
+    // --- Täytä Nimi ---
+    cy.get('input[id="nimi"]')
+      .type('Matti Meikäläinen')
+      .should('have.value', 'Matti Meikäläinen');
 
-    cy.visit('https://fi.wikipedia.org/w/index.php?search=Jamk');
+    // --- Täytä Puhelin ---
+    cy.get('input[id="puhelin"]')
+      .type('0401234567')
+      .should('have.value', '0401234567');
 
-    // 3. Tarkista, että olemme oikealla sivulla
-    cy.location('pathname', { timeout: 10000 }).should((pathname) => {
-      expect(pathname).to.match(/\/wiki\/Jyv.*skyl.*n_ammattikorkeakoulu/);
-    });
+    // --- Täytä Sähköposti ---
+    cy.get('input[id="sposti"]')
+      .type('matti.meikalainen@example.com')
+      .should('have.value', 'matti.meikalainen@example.com');
 
-    // 4. Rullaa kohtaan "Kampukset"
-    cy.contains('h2', 'Kampukset').scrollIntoView();
+    // --- Valitse koko ---
+    cy.get('#koko').select('Suuri');
 
-    // 5. Tarkista, että "Kampukset" on näkyvillä
-    cy.contains('h2', 'Kampukset').should('be.visible');
+    // --- Valitse pohja ---
+    cy.get('#Normaali').check({ force: true }).should('be.checked');
 
-    // 6. Odota 5 sekuntia
-    cy.wait(5000);
-
-    // 7. Vaihda kieli englanniksi
-    cy.visit(
-      'https://en.wikipedia.org/wiki/JAMK_University_of_Applied_Sciences',
-    );
-    cy.reload();
-    // 8. Tarkista, että uusi sivu on oikea
-    cy.location('pathname', { timeout: 10000 }).should((pathname) => {
-      expect(pathname).to.match('wiki/JAMK_University_of_Applied_Sciences');
-    });
-
-    cy.contains('JAMK University of Applied Sciences').should('be.visible');
+    // --- Valitse täytteet ---
+    cy.get('#Tonnikala').check({ force: true });
+    cy.get('#Kinkku').check({ force: true });
+    cy.get('#Ananas').check({ force: true });
+    // --- Tarkista hinta ---
+    // Oletetaan, että hinta-elementti on id="hinta"
+    cy.contains('p', 'Hinta:').should('contain', '13.00');
   });
 });
